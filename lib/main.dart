@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'core/theme/app_theme.dart';
+import 'core/widgets/responsive_wrapper.dart';
 import 'features/splash/presentation/splash_screen.dart';
 
 void main() {
@@ -23,6 +24,9 @@ class MyApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           theme: AppTheme.lightTheme,
           home: const SplashScreen(),
+          builder: (context, child) {
+            return ResponsiveWrapper(child: child!);
+          },
         );
       },
     );
