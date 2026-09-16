@@ -32,10 +32,7 @@ class _SplashScreenState extends State<SplashScreen> {
         fit: StackFit.expand,
         children: [
           // Full-screen background image.
-          Image.asset(
-            'assets/images/modelimage.png',
-            fit: BoxFit.cover,
-          ),
+          Image.asset('assets/images/splash.png', fit: BoxFit.cover),
 
           // Subtle dark overlay so the logo text stays readable.
           Container(color: Colors.black.withValues(alpha: 0.35)),
@@ -46,9 +43,9 @@ class _SplashScreenState extends State<SplashScreen> {
             child: Text(
               'YINKS',
               style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                    color: AppColors.background,
-                    letterSpacing: 4,
-                  ),
+                color: AppColors.background,
+                letterSpacing: 4,
+              ),
             ),
           ),
         ],

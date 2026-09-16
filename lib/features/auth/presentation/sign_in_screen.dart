@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../salon_dashboard/presentation/salon_dashboard_screen.dart';
 import 'forgot_password_screen.dart';
 import 'sign_up_screen.dart';
 
@@ -125,7 +126,16 @@ class _SignInScreenState extends State<SignInScreen> {
                 width: double.infinity,
                 height: 52.h,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  // No real auth check yet — navigates straight through
+                  // for UI testing, regardless of the selected account
+                  // type.
+                  onPressed: () {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                        builder: (_) => const SalonDashboardScreen(),
+                      ),
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     shape: RoundedRectangleBorder(
