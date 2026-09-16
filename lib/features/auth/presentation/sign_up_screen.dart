@@ -1,3 +1,4 @@
+import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -325,32 +326,62 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Widget _buildPhoneField() {
-    // Custom UK-only input (no external phone package, no flags/emoji)
-    // to avoid the intl_phone_field tablet rendering issues. When
-    // international support is needed later, a proper country selector
-    // will be built from scratch instead of reintroducing that package.
+    // country_code_picker renders its flag via a bundled PNG
+    // (Image.asset(..., package: 'country_code_picker')) on every
+    // platform, unlike intl_phone_field which fell back to an emoji
+    // glyph on mobile — so it isn't expected to hit the same tofu-on-
+    // tablet issue. showFlag is left on; if it's ever seen rendering
+    // broken on a real tablet, flip it to false for a text-only "+44".
     final radius = BorderRadius.circular(8.r);
+    // Row's default mainAxisSize.max made the un-widthed picker
+    // Container inherit the Row's full available width (its internal
+    // Flexible children use FlexFit.loose, which only controls whether
+    // *they* fill their allotted share — not whether the Row itself
+    // shrinks). Giving the picker a fixed compact width, plus an
+    // explicit matching height on both children below, keeps it sized
+    // to just its content and aligned with the phone TextField.
+    //
+    // Note: crossAxisAlignment.stretch is intentionally NOT used here —
+    // this Row sits inside a Column inside a SingleChildScrollView,
+    // which gives it unbounded height. stretch would then force an
+    // infinite height constraint onto the fixed-height SizedBoxes
+    // below, which crashes with "BoxConstraints forces an infinite
+    // height". The explicit 52.h on both children already guarantees
+    // identical height without needing stretch.
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Container(
+        SizedBox(
+          width: 108.w,
           height: 52.h,
-          padding: EdgeInsets.symmetric(horizontal: 16.w),
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: AppColors.surfaceContainer,
-            borderRadius: radius,
-            border: Border.all(color: AppColors.border),
+          child: Container(
+            decoration: BoxDecoration(
+              color: AppColors.surfaceContainer,
+              borderRadius: radius,
+              border: Border.all(color: AppColors.border),
+            ),
+            child: CountryCodePicker(
+              onChanged: (_) {},
+              initialSelection: 'GB',
+              showFlag: true,
+              showDropDownButton: true,
+              alignLeft: false,
+              padding: EdgeInsets.symmetric(horizontal: 4.w),
+              flagWidth: 20.w,
+              textStyle: AppTextStyles.bodyMd,
+            ),
           ),
-          child: Text('+44', style: AppTextStyles.bodyMd),
         ),
         SizedBox(width: 8.w),
         Expanded(
-          child: TextField(
-            controller: _phoneController,
-            keyboardType: TextInputType.phone,
-            style: AppTextStyles.bodyMd,
-            decoration: _inputDecoration(hintText: 'Enter phone number'),
+          child: SizedBox(
+            height: 52.h,
+            child: TextField(
+              controller: _phoneController,
+              keyboardType: TextInputType.phone,
+              style: AppTextStyles.bodyMd,
+              decoration: _inputDecoration(hintText: 'Enter phone number'),
+            ),
           ),
         ),
       ],

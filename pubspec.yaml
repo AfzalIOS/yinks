@@ -41,6 +41,9 @@ dependencies:
   # Provides screen-size-relative sizing (.w/.h/.sp) for responsive layouts.
   flutter_screenutil: ^5.9.3
 
+  # Country dial-code picker (Sign Up screen phone field).
+  country_code_picker: ^3.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

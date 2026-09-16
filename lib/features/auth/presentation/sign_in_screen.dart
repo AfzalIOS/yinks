@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import 'forgot_password_screen.dart';
 import 'sign_up_screen.dart';
 
 enum _AccountType { salon, hairdresser }
@@ -104,7 +105,13 @@ class _SignInScreenState extends State<SignInScreen> {
               Align(
                 alignment: Alignment.centerRight,
                 child: GestureDetector(
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const ForgotPasswordScreen(),
+                      ),
+                    );
+                  },
                   child: Text(
                     'Forgot Password?',
                     style: AppTextStyles.labelLg.copyWith(
