@@ -3,7 +3,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../domain/booking_details.dart';
 import '../domain/hairdresser_summary.dart';
+import 'shift_request_sent_screen.dart';
 
 const List<String> _stationOptions = [
   'Chair 01 (Senior Cutting Station)',
@@ -187,8 +189,22 @@ class _BookShiftScreenState extends State<BookShiftScreen> {
                 width: double.infinity,
                 height: 52.h,
                 child: ElevatedButton(
-                  // Will navigate to a confirmation screen once built.
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => ShiftRequestSentScreen(
+                          hairdresser: hairdresser,
+                          details: BookingDetails(
+                            shiftDate: _shiftDate ?? DateTime.now(),
+                            hoursLabel: _hoursLabel.isEmpty
+                                ? 'Not set'
+                                : _hoursLabel,
+                            station: _station ?? 'Not assigned',
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     shape: RoundedRectangleBorder(
