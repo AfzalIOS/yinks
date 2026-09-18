@@ -1,5 +1,7 @@
 import '../domain/hairdresser_summary.dart';
+import '../domain/salon_profile.dart';
 import '../domain/salon_repository.dart';
+import '../domain/shift_request.dart';
 
 /// Hardcoded [SalonRepository] used until a real backend is wired up.
 /// Simulates network latency with [Future.delayed].
@@ -144,6 +146,118 @@ class MockSalonRepository implements SalonRepository {
   Future<List<HairdresserSummary>> getAllHairdressers() async {
     await Future.delayed(_simulatedDelay);
     return _allHairdressers;
+  }
+
+  static final _myRequests = [
+    ShiftRequest(
+      id: 'YNK-4821',
+      hairdresserName: 'Amara Whitfield',
+      shiftDate: DateTime(2026, 5, 23),
+      hours: '09:30 - 18:00',
+      station: 'Chair 01 (Senior Cutting Station)',
+      amount: 220,
+      status: ShiftRequestStatus.pending,
+    ),
+    ShiftRequest(
+      id: 'YNK-4802',
+      hairdresserName: 'Freya Sinclair',
+      shiftDate: DateTime(2026, 5, 27),
+      hours: '10:00 - 17:00',
+      station: 'Chair 03 (Color Bar & Balayage Station)',
+      amount: 175,
+      status: ShiftRequestStatus.pending,
+    ),
+    ShiftRequest(
+      id: 'YNK-4756',
+      hairdresserName: 'Jonas Reeve',
+      shiftDate: DateTime(2026, 5, 24),
+      hours: '09:00 - 17:30',
+      station: 'Chair 01 (Senior Cutting Station)',
+      amount: 180,
+      status: ShiftRequestStatus.accepted,
+    ),
+    ShiftRequest(
+      id: 'YNK-4711',
+      hairdresserName: 'Priya Chandran',
+      shiftDate: DateTime(2026, 5, 25),
+      hours: '08:00 - 20:00',
+      station: 'VIP Private Suite',
+      amount: 260,
+      status: ShiftRequestStatus.accepted,
+    ),
+    ShiftRequest(
+      id: 'YNK-4680',
+      hairdresserName: 'Marcus Odell',
+      shiftDate: DateTime(2026, 5, 22),
+      hours: '09:00 - 15:00',
+      station: 'Chair 01 (Senior Cutting Station)',
+      amount: 210,
+      status: ShiftRequestStatus.declined,
+    ),
+  ];
+
+  @override
+  Future<List<ShiftRequest>> getMyRequests() async {
+    await Future.delayed(_simulatedDelay);
+    return _myRequests;
+  }
+
+  // Dated relative to DateTime.now() (rather than the fixed dates used
+  // by _myRequests) so "Today & Tomorrow" vs "Upcoming" grouping on the
+  // Bookings screen demonstrates correctly whenever the app is run.
+  static final _confirmedBookings = [
+    ShiftRequest(
+      id: 'YNK-4756',
+      hairdresserName: 'Jonas Reeve',
+      shiftDate: DateTime.now(),
+      hours: '09:00 - 17:30',
+      station: 'Chair 01 (Senior Cutting Station)',
+      amount: 180,
+      status: ShiftRequestStatus.accepted,
+    ),
+    ShiftRequest(
+      id: 'YNK-4711',
+      hairdresserName: 'Priya Chandran',
+      shiftDate: DateTime.now().add(const Duration(days: 1)),
+      hours: '08:00 - 20:00',
+      station: 'VIP Private Suite',
+      amount: 260,
+      status: ShiftRequestStatus.accepted,
+    ),
+    ShiftRequest(
+      id: 'YNK-4790',
+      hairdresserName: 'Marcus Odell',
+      shiftDate: DateTime.now().add(const Duration(days: 9)),
+      hours: '09:00 - 15:00',
+      station: 'Chair 01 (Senior Cutting Station)',
+      amount: 210,
+      status: ShiftRequestStatus.accepted,
+    ),
+  ];
+
+  @override
+  Future<List<ShiftRequest>> getConfirmedBookings() async {
+    await Future.delayed(_simulatedDelay);
+    return _confirmedBookings;
+  }
+
+  static const _myProfile = SalonProfile(
+    salonName: 'Maison Mayfair',
+    location: 'Mayfair Atelier, Mayfair, London',
+    phone: '+44 20 7946 0958',
+    email: 'hello@maisonmayfair.co.uk',
+    aboutText:
+        'Maison Mayfair is a boutique salon in the heart of Mayfair, '
+        'known for pairing London\'s top freelance stylists with a '
+        'refined, client-first atelier experience since 2016.',
+    photoUrls: [],
+    openingHours: 'Mon-Sat: 9AM - 7PM',
+  );
+
+  @override
+  Future<SalonProfile> getMyProfile() async {
+    await Future.delayed(_simulatedDelay);
+    return _myProfile;
   }
 
   @override

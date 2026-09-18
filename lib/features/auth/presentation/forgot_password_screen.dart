@@ -3,11 +3,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/widgets/adaptive_auth_layout.dart';
 import 'sign_in_screen.dart';
 
-/// Forgot Password screen: an email-request form that switches to a
-/// confirmation state after tapping "Send Reset Link". No real backend
-/// call yet — the send is simulated locally.
+/// Forgot Password screen.
+///
+/// User enters an email address and taps "Send Reset Link".
+/// For now, the reset action is simulated locally.
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
 
@@ -18,7 +20,27 @@ class ForgotPasswordScreen extends StatefulWidget {
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   bool _linkSent = false;
 
-  final _emailController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+
+  // ------------------------------------------------------------
+  // RESPONSIVE HELPERS
+  // ------------------------------------------------------------
+
+  bool _isTablet(BuildContext context) {
+    return MediaQuery.sizeOf(context).shortestSide >= 600;
+  }
+
+  double _h(BuildContext context, double value) {
+    return _isTablet(context) ? value : value.h;
+  }
+
+  double _radius(BuildContext context, double value) {
+    return _isTablet(context) ? value : value.r;
+  }
+
+  // ------------------------------------------------------------
+  // DISPOSE
+  // ------------------------------------------------------------
 
   @override
   void dispose() {
@@ -26,72 +48,119 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     super.dispose();
   }
 
+  // ------------------------------------------------------------
+  // NAVIGATION
+  // ------------------------------------------------------------
+
   void _goToSignIn() {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const SignInScreen()),
-    );
+    Navigator.of(
+      context,
+    ).pushReplacement(MaterialPageRoute(builder: (_) => const SignInScreen()));
   }
+
+  // ------------------------------------------------------------
+  // SCREEN
+  // ------------------------------------------------------------
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 24.h),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (!_linkSent) ..._buildRequestState() else ..._buildSentState(),
-            ],
-          ),
+        child: AdaptiveAuthLayout(
+          tagline: 'Where Talent Meets Opportunity',
+          marketingText:
+              'Trusted by leading salons across London to book verified, '
+              'freelance hairdressing talent on demand.',
+          formContent: _buildForm(context),
         ),
       ),
     );
   }
 
-  List<Widget> _buildRequestState() {
+  // ------------------------------------------------------------
+  // MAIN FORM
+  // ------------------------------------------------------------
+
+  Widget _buildForm(BuildContext context) {
+    final bool isTablet = _isTablet(context);
+
+    return SingleChildScrollView(
+      padding: EdgeInsets.symmetric(
+        horizontal: isTablet ? 24 : 24.w,
+        vertical: isTablet ? 24 : 24.h,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (!_linkSent)
+            ..._buildRequestState(context)
+          else
+            ..._buildSentState(context),
+        ],
+      ),
+    );
+  }
+
+  // ------------------------------------------------------------
+  // REQUEST RESET STATE
+  // ------------------------------------------------------------
+
+  List<Widget> _buildRequestState(BuildContext context) {
     return [
       Text('Forgot Password?', style: AppTextStyles.headlineMd),
-      SizedBox(height: 8.h),
+
+      SizedBox(height: _h(context, 8)),
+
       Text(
         "Enter your email address and we'll send you a link to reset "
         'your password.',
         style: AppTextStyles.bodyMd.copyWith(color: AppColors.textSecondary),
       ),
-      SizedBox(height: 32.h),
+
+      SizedBox(height: _h(context, 32)),
+
       Text('Email', style: AppTextStyles.labelLg),
-      SizedBox(height: 8.h),
+
+      SizedBox(height: _h(context, 8)),
+
       TextField(
         controller: _emailController,
         keyboardType: TextInputType.emailAddress,
         style: AppTextStyles.bodyMd,
-        decoration: _inputDecoration(hintText: 'Enter email address'),
+        decoration: _inputDecoration(context, hintText: 'Enter email address'),
       ),
-      SizedBox(height: 24.h),
+
+      SizedBox(height: _h(context, 24)),
+
       SizedBox(
         width: double.infinity,
-        height: 52.h,
+        height: _h(context, 52),
         child: ElevatedButton(
-          onPressed: () => setState(() => _linkSent = true),
+          onPressed: () {
+            setState(() {
+              _linkSent = true;
+            });
+          },
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primary,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8.r),
+              borderRadius: BorderRadius.circular(_radius(context, 8)),
             ),
           ),
           child: Text(
             'Send Reset Link',
-            style: AppTextStyles.titleMd.copyWith(
-              color: AppColors.background,
-            ),
+            style: AppTextStyles.titleMd.copyWith(color: AppColors.background),
           ),
         ),
       ),
-      SizedBox(height: 24.h),
+
+      SizedBox(height: _h(context, 24)),
+
       Center(
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
+        child: Wrap(
+          alignment: WrapAlignment.center,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             Text(
               'Remember your password? ',
@@ -115,45 +184,64 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     ];
   }
 
-  List<Widget> _buildSentState() {
+  // ------------------------------------------------------------
+  // RESET LINK SENT STATE
+  // ------------------------------------------------------------
+
+  List<Widget> _buildSentState(BuildContext context) {
     return [
       Text('Check your email', style: AppTextStyles.headlineMd),
-      SizedBox(height: 8.h),
+
+      SizedBox(height: _h(context, 8)),
+
       Text(
         "We've sent a password reset link to your email address.",
         style: AppTextStyles.bodyMd.copyWith(color: AppColors.textSecondary),
       ),
-      SizedBox(height: 32.h),
+
+      SizedBox(height: _h(context, 32)),
+
       SizedBox(
         width: double.infinity,
-        height: 52.h,
+        height: _h(context, 52),
         child: ElevatedButton(
           onPressed: _goToSignIn,
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primary,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8.r),
+              borderRadius: BorderRadius.circular(_radius(context, 8)),
             ),
           ),
           child: Text(
             'Back to Sign In',
-            style: AppTextStyles.titleMd.copyWith(
-              color: AppColors.background,
-            ),
+            style: AppTextStyles.titleMd.copyWith(color: AppColors.background),
           ),
         ),
       ),
     ];
   }
 
-  InputDecoration _inputDecoration({required String hintText}) {
-    final radius = BorderRadius.circular(8.r);
+  // ------------------------------------------------------------
+  // INPUT DECORATION
+  // ------------------------------------------------------------
+
+  InputDecoration _inputDecoration(
+    BuildContext context, {
+    required String hintText,
+  }) {
+    final bool isTablet = _isTablet(context);
+
+    final BorderRadius radius = BorderRadius.circular(isTablet ? 8 : 8.r);
+
     return InputDecoration(
       hintText: hintText,
       hintStyle: AppTextStyles.bodyMd.copyWith(color: AppColors.textSecondary),
       filled: true,
       fillColor: AppColors.surfaceContainer,
-      contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+      contentPadding: EdgeInsets.symmetric(
+        horizontal: isTablet ? 16 : 16.w,
+        vertical: isTablet ? 14 : 14.h,
+      ),
       border: OutlineInputBorder(
         borderRadius: radius,
         borderSide: BorderSide(color: AppColors.border),

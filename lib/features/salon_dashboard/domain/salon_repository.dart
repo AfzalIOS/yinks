@@ -1,4 +1,6 @@
 import 'hairdresser_summary.dart';
+import 'salon_profile.dart';
+import 'shift_request.dart';
 
 /// Data source for the Salon Dashboard screen.
 ///
@@ -12,4 +14,10 @@ abstract class SalonRepository {
   Future<int> getActiveInvitesCount();
 
   Future<int> getUpcomingShiftsCount();
+
+  Future<List<ShiftRequest>> getMyRequests();
+
+  Future<List<ShiftRequest>> getConfirmedBookings();
+
+  Future<SalonProfile> getMyProfile();
 }

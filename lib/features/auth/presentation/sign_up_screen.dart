@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/widgets/adaptive_auth_layout.dart';
 import 'sign_in_screen.dart';
 
 enum _AccountType { salon, hairdresser }
@@ -17,8 +18,6 @@ const List<String> _experienceOptions = [
 
 const List<String> _availabilityOptions = ['Daily', 'Weekends', 'Long-term'];
 
-/// Sign Up screen: account type selection with dynamic Salon /
-/// Hairdresser forms. No auth logic wired up yet.
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
 
@@ -28,8 +27,10 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignUpScreenState extends State<SignUpScreen> {
   _AccountType _accountType = _AccountType.salon;
+
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+
   String? _experience;
   String? _availability;
 
@@ -43,6 +44,30 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
+  // ------------------------------------------------------------
+  // RESPONSIVE HELPERS
+  // ------------------------------------------------------------
+
+  bool _isTablet(BuildContext context) {
+    return MediaQuery.sizeOf(context).shortestSide >= 600;
+  }
+
+  double _h(BuildContext context, double value) {
+    return _isTablet(context) ? value : value.h;
+  }
+
+  double _w(BuildContext context, double value) {
+    return _isTablet(context) ? value : value.w;
+  }
+
+  double _radius(BuildContext context, double value) {
+    return _isTablet(context) ? value : value.r;
+  }
+
+  double _iconSize(BuildContext context, double value) {
+    return _isTablet(context) ? value : value.sp;
+  }
+
   @override
   void dispose() {
     _salonNameController.dispose();
@@ -54,239 +79,378 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _specialtiesController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+
     super.dispose();
   }
+
+  // ------------------------------------------------------------
+  // SCREEN
+  // ------------------------------------------------------------
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 24.h),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Create Account', style: AppTextStyles.headlineMd),
-              SizedBox(height: 8.h),
-              Text(
-                'Join YINKS and get started',
-                style: AppTextStyles.bodyMd.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              SizedBox(height: 32.h),
-              Text('Account Type', style: AppTextStyles.labelLg),
-              SizedBox(height: 12.h),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildAccountTypeOption(
-                      type: _AccountType.salon,
-                      label: 'Salon',
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildAccountTypeOption(
-                      type: _AccountType.hairdresser,
-                      label: 'Hairdresser',
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 24.h),
-              if (_accountType == _AccountType.salon)
-                _buildSalonForm()
-              else
-                _buildHairdresserForm(),
-              SizedBox(height: 24.h),
-              SizedBox(
-                width: double.infinity,
-                height: 52.h,
-                child: ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
-                  ),
-                  child: Text(
-                    'Create Account',
-                    style: AppTextStyles.titleMd.copyWith(
-                      color: AppColors.background,
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(height: 24.h),
-              Center(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Already have an account? ',
-                      style: AppTextStyles.bodyMd.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(
-                            builder: (_) => const SignInScreen(),
-                          ),
-                        );
-                      },
-                      child: Text(
-                        'Sign In',
-                        style: AppTextStyles.bodyMd.copyWith(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+        child: AdaptiveAuthLayout(
+          tagline: 'Where Talent Meets Opportunity',
+          marketingText:
+              'Join YINKS and connect with trusted salons and professional '
+              'hairdressing talent across the UK.',
+          formContent: _buildForm(context),
         ),
       ),
     );
   }
 
-  Widget _buildSalonForm() {
+  // ------------------------------------------------------------
+  // MAIN FORM
+  // ------------------------------------------------------------
+
+  Widget _buildForm(BuildContext context) {
+    final isTablet = _isTablet(context);
+
+    return SingleChildScrollView(
+      padding: EdgeInsets.symmetric(
+        horizontal: isTablet ? 24 : 24.w,
+        vertical: isTablet ? 24 : 24.h,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // HEADER
+          Text('Create Account', style: AppTextStyles.headlineMd),
+
+          SizedBox(height: _h(context, 8)),
+
+          Text(
+            'Join YINKS and get started',
+            style: AppTextStyles.bodyMd.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+
+          SizedBox(height: _h(context, 32)),
+
+          // ACCOUNT TYPE
+          Text('Account Type', style: AppTextStyles.labelLg),
+
+          SizedBox(height: _h(context, 12)),
+
+          Row(
+            children: [
+              Expanded(
+                child: _buildAccountTypeOption(
+                  context: context,
+                  type: _AccountType.salon,
+                  label: 'Salon',
+                ),
+              ),
+
+              SizedBox(width: _w(context, 12)),
+
+              Expanded(
+                child: _buildAccountTypeOption(
+                  context: context,
+                  type: _AccountType.hairdresser,
+                  label: 'Hairdresser',
+                ),
+              ),
+            ],
+          ),
+
+          SizedBox(height: _h(context, 24)),
+
+          // DYNAMIC FORM
+          if (_accountType == _AccountType.salon)
+            _buildSalonForm(context)
+          else
+            _buildHairdresserForm(context),
+
+          SizedBox(height: _h(context, 24)),
+
+          // CREATE ACCOUNT BUTTON
+          SizedBox(
+            width: double.infinity,
+            height: _h(context, 52),
+            child: ElevatedButton(
+              onPressed: () {},
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(_radius(context, 8)),
+                ),
+              ),
+              child: Text(
+                'Create Account',
+                style: AppTextStyles.titleMd.copyWith(
+                  color: AppColors.background,
+                ),
+              ),
+            ),
+          ),
+
+          SizedBox(height: _h(context, 24)),
+
+          // SIGN IN
+          Center(
+            child: Wrap(
+              alignment: WrapAlignment.center,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Text(
+                  'Already have an account? ',
+                  style: AppTextStyles.bodyMd.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (_) => const SignInScreen()),
+                    );
+                  },
+                  child: Text(
+                    'Sign In',
+                    style: AppTextStyles.bodyMd.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ------------------------------------------------------------
+  // SALON FORM
+  // ------------------------------------------------------------
+
+  Widget _buildSalonForm(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildLabel('Salon Name'),
+        _buildLabel(context, 'Salon Name'),
+
         _buildTextField(
+          context: context,
           controller: _salonNameController,
           hintText: 'Enter salon name',
         ),
-        SizedBox(height: 16.h),
-        _buildLabel('Phone Number'),
-        _buildPhoneField(),
-        SizedBox(height: 16.h),
-        _buildLabel('Location'),
+
+        SizedBox(height: _h(context, 16)),
+
+        _buildLabel(context, 'Phone Number'),
+
+        _buildPhoneField(context),
+
+        SizedBox(height: _h(context, 16)),
+
+        _buildLabel(context, 'Location'),
+
         _buildTextField(
+          context: context,
           controller: _locationController,
           hintText: 'Search your salon location',
         ),
-        SizedBox(height: 16.h),
-        _buildLabel('Email'),
+
+        SizedBox(height: _h(context, 16)),
+
+        _buildLabel(context, 'Email'),
+
         _buildTextField(
+          context: context,
           controller: _emailController,
           hintText: 'Enter email address',
           keyboardType: TextInputType.emailAddress,
         ),
-        SizedBox(height: 16.h),
-        _buildLabel('Password'),
+
+        SizedBox(height: _h(context, 16)),
+
+        _buildLabel(context, 'Password'),
+
         _buildPasswordField(
+          context: context,
           controller: _passwordController,
           hintText: 'Enter password',
           obscureText: _obscurePassword,
-          onToggle: () => setState(() => _obscurePassword = !_obscurePassword),
+          onToggle: () {
+            setState(() {
+              _obscurePassword = !_obscurePassword;
+            });
+          },
         ),
-        SizedBox(height: 16.h),
-        _buildLabel('Confirm Password'),
+
+        SizedBox(height: _h(context, 16)),
+
+        _buildLabel(context, 'Confirm Password'),
+
         _buildPasswordField(
+          context: context,
           controller: _confirmPasswordController,
           hintText: 'Confirm password',
           obscureText: _obscureConfirmPassword,
-          onToggle: () => setState(
-            () => _obscureConfirmPassword = !_obscureConfirmPassword,
-          ),
+          onToggle: () {
+            setState(() {
+              _obscureConfirmPassword = !_obscureConfirmPassword;
+            });
+          },
         ),
       ],
     );
   }
 
-  Widget _buildHairdresserForm() {
+  // ------------------------------------------------------------
+  // HAIRDRESSER FORM
+  // ------------------------------------------------------------
+
+  Widget _buildHairdresserForm(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildLabel('Full Name'),
+        _buildLabel(context, 'Full Name'),
+
         _buildTextField(
+          context: context,
           controller: _fullNameController,
           hintText: 'Enter full name',
         ),
-        SizedBox(height: 16.h),
-        _buildLabel('Phone Number'),
-        _buildPhoneField(),
-        SizedBox(height: 16.h),
-        _buildLabel('Location'),
+
+        SizedBox(height: _h(context, 16)),
+
+        _buildLabel(context, 'Phone Number'),
+
+        _buildPhoneField(context),
+
+        SizedBox(height: _h(context, 16)),
+
+        _buildLabel(context, 'Location'),
+
         _buildTextField(
+          context: context,
           controller: _locationController,
           hintText: 'Search your location',
         ),
-        SizedBox(height: 16.h),
-        _buildLabel('Email'),
+
+        SizedBox(height: _h(context, 16)),
+
+        _buildLabel(context, 'Email'),
+
         _buildTextField(
+          context: context,
           controller: _emailController,
           hintText: 'Enter email address',
           keyboardType: TextInputType.emailAddress,
         ),
-        SizedBox(height: 16.h),
-        _buildLabel('NI Number'),
+
+        SizedBox(height: _h(context, 16)),
+
+        _buildLabel(context, 'NI Number'),
+
         _buildTextField(
+          context: context,
           controller: _niNumberController,
           hintText: 'Enter NI number',
         ),
-        SizedBox(height: 16.h),
-        _buildLabel('Years of Experience'),
+
+        SizedBox(height: _h(context, 16)),
+
+        _buildLabel(context, 'Years of Experience'),
+
         _buildDropdown(
+          context: context,
           hintText: 'Select experience',
           value: _experience,
           options: _experienceOptions,
-          onChanged: (value) => setState(() => _experience = value),
+          onChanged: (value) {
+            setState(() {
+              _experience = value;
+            });
+          },
         ),
-        SizedBox(height: 16.h),
-        _buildLabel('Specialties'),
+
+        SizedBox(height: _h(context, 16)),
+
+        _buildLabel(context, 'Specialties'),
+
         _buildTextField(
+          context: context,
           controller: _specialtiesController,
           hintText: 'Enter Your Specialties ',
         ),
-        SizedBox(height: 16.h),
-        _buildLabel('Availability'),
+
+        SizedBox(height: _h(context, 16)),
+
+        _buildLabel(context, 'Availability'),
+
         _buildDropdown(
+          context: context,
           hintText: 'Select availability',
           value: _availability,
           options: _availabilityOptions,
-          onChanged: (value) => setState(() => _availability = value),
+          onChanged: (value) {
+            setState(() {
+              _availability = value;
+            });
+          },
         ),
-        SizedBox(height: 16.h),
-        _buildLabel('Password'),
+
+        SizedBox(height: _h(context, 16)),
+
+        _buildLabel(context, 'Password'),
+
         _buildPasswordField(
+          context: context,
           controller: _passwordController,
           hintText: 'Enter password',
           obscureText: _obscurePassword,
-          onToggle: () => setState(() => _obscurePassword = !_obscurePassword),
+          onToggle: () {
+            setState(() {
+              _obscurePassword = !_obscurePassword;
+            });
+          },
         ),
-        SizedBox(height: 16.h),
-        _buildLabel('Confirm Password'),
+
+        SizedBox(height: _h(context, 16)),
+
+        _buildLabel(context, 'Confirm Password'),
+
         _buildPasswordField(
+          context: context,
           controller: _confirmPasswordController,
           hintText: 'Confirm password',
           obscureText: _obscureConfirmPassword,
-          onToggle: () => setState(
-            () => _obscureConfirmPassword = !_obscureConfirmPassword,
-          ),
+          onToggle: () {
+            setState(() {
+              _obscureConfirmPassword = !_obscureConfirmPassword;
+            });
+          },
         ),
       ],
     );
   }
 
-  Widget _buildLabel(String text) {
+  // ------------------------------------------------------------
+  // LABEL
+  // ------------------------------------------------------------
+
+  Widget _buildLabel(BuildContext context, String text) {
     return Padding(
-      padding: EdgeInsets.only(bottom: 8.h),
+      padding: EdgeInsets.only(bottom: _h(context, 8)),
       child: Text(text, style: AppTextStyles.labelLg),
     );
   }
 
+  // ------------------------------------------------------------
+  // NORMAL TEXT FIELD
+  // ------------------------------------------------------------
+
   Widget _buildTextField({
+    required BuildContext context,
     required TextEditingController controller,
     required String hintText,
     TextInputType? keyboardType,
@@ -295,11 +459,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
       controller: controller,
       keyboardType: keyboardType,
       style: AppTextStyles.bodyMd,
-      decoration: _inputDecoration(hintText: hintText),
+      decoration: _inputDecoration(context: context, hintText: hintText),
     );
   }
 
+  // ------------------------------------------------------------
+  // PASSWORD FIELD
+  // ------------------------------------------------------------
+
   Widget _buildPasswordField({
+    required BuildContext context,
     required TextEditingController controller,
     required String hintText,
     required bool obscureText,
@@ -310,6 +479,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       obscureText: obscureText,
       style: AppTextStyles.bodyMd,
       decoration: _inputDecoration(
+        context: context,
         hintText: hintText,
         suffixIcon: IconButton(
           icon: Icon(
@@ -317,7 +487,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ? Icons.visibility_outlined
                 : Icons.visibility_off_outlined,
             color: AppColors.textSecondary,
-            size: 20.sp,
+            size: _iconSize(context, 20),
           ),
           onPressed: onToggle,
         ),
@@ -325,35 +495,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  Widget _buildPhoneField() {
-    // country_code_picker renders its flag via a bundled PNG
-    // (Image.asset(..., package: 'country_code_picker')) on every
-    // platform, unlike intl_phone_field which fell back to an emoji
-    // glyph on mobile — so it isn't expected to hit the same tofu-on-
-    // tablet issue. showFlag is left on; if it's ever seen rendering
-    // broken on a real tablet, flip it to false for a text-only "+44".
-    final radius = BorderRadius.circular(8.r);
-    // Row's default mainAxisSize.max made the un-widthed picker
-    // Container inherit the Row's full available width (its internal
-    // Flexible children use FlexFit.loose, which only controls whether
-    // *they* fill their allotted share — not whether the Row itself
-    // shrinks). Giving the picker a fixed compact width, plus an
-    // explicit matching height on both children below, keeps it sized
-    // to just its content and aligned with the phone TextField.
-    //
-    // Note: crossAxisAlignment.stretch is intentionally NOT used here —
-    // this Row sits inside a Column inside a SingleChildScrollView,
-    // which gives it unbounded height. stretch would then force an
-    // infinite height constraint onto the fixed-height SizedBoxes
-    // below, which crashes with "BoxConstraints forces an infinite
-    // height". The explicit 52.h on both children already guarantees
-    // identical height without needing stretch.
+  // ------------------------------------------------------------
+  // PHONE FIELD
+  // ------------------------------------------------------------
+
+  Widget _buildPhoneField(BuildContext context) {
+    final isTablet = _isTablet(context);
+
+    final radius = BorderRadius.circular(_radius(context, 8));
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(
-          width: 108.w,
-          height: 52.h,
+          width: isTablet ? 108 : 108.w,
+          height: isTablet ? 52 : 52.h,
           child: Container(
             decoration: BoxDecoration(
               color: AppColors.surfaceContainer,
@@ -366,21 +522,26 @@ class _SignUpScreenState extends State<SignUpScreen> {
               showFlag: true,
               showDropDownButton: true,
               alignLeft: false,
-              padding: EdgeInsets.symmetric(horizontal: 4.w),
-              flagWidth: 20.w,
+              padding: EdgeInsets.symmetric(horizontal: isTablet ? 4 : 4.w),
+              flagWidth: isTablet ? 20 : 20.w,
               textStyle: AppTextStyles.bodyMd,
             ),
           ),
         ),
-        SizedBox(width: 8.w),
+
+        SizedBox(width: isTablet ? 8 : 8.w),
+
         Expanded(
           child: SizedBox(
-            height: 52.h,
+            height: isTablet ? 52 : 52.h,
             child: TextField(
               controller: _phoneController,
               keyboardType: TextInputType.phone,
               style: AppTextStyles.bodyMd,
-              decoration: _inputDecoration(hintText: 'Enter phone number'),
+              decoration: _inputDecoration(
+                context: context,
+                hintText: 'Enter phone number',
+              ),
             ),
           ),
         ),
@@ -388,7 +549,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
+  // ------------------------------------------------------------
+  // DROPDOWN
+  // ------------------------------------------------------------
+
   Widget _buildDropdown({
+    required BuildContext context,
     required String hintText,
     required String? value,
     required List<String> options,
@@ -400,43 +566,59 @@ class _SignUpScreenState extends State<SignUpScreen> {
       icon: Icon(
         Icons.keyboard_arrow_down,
         color: AppColors.textSecondary,
-        size: 20.sp,
+        size: _iconSize(context, 20),
       ),
       hint: Text(
         hintText,
         style: AppTextStyles.bodyMd.copyWith(color: AppColors.textSecondary),
       ),
       style: AppTextStyles.bodyMd,
-      decoration: _inputDecoration(hintText: hintText),
+      decoration: _inputDecoration(context: context, hintText: hintText),
       items: options
           .map(
-            (option) => DropdownMenuItem(value: option, child: Text(option)),
+            (option) =>
+                DropdownMenuItem<String>(value: option, child: Text(option)),
           )
           .toList(),
       onChanged: onChanged,
     );
   }
 
+  // ------------------------------------------------------------
+  // INPUT DECORATION
+  // ------------------------------------------------------------
+
   InputDecoration _inputDecoration({
+    required BuildContext context,
     required String hintText,
     Widget? suffixIcon,
   }) {
-    final radius = BorderRadius.circular(8.r);
+    final isTablet = _isTablet(context);
+
+    final radius = BorderRadius.circular(isTablet ? 8 : 8.r);
+
     return InputDecoration(
       hintText: hintText,
       hintStyle: AppTextStyles.bodyMd.copyWith(color: AppColors.textSecondary),
       filled: true,
       fillColor: AppColors.surfaceContainer,
       suffixIcon: suffixIcon,
-      contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+
+      contentPadding: EdgeInsets.symmetric(
+        horizontal: isTablet ? 16 : 16.w,
+        vertical: isTablet ? 14 : 14.h,
+      ),
+
       border: OutlineInputBorder(
         borderRadius: radius,
         borderSide: BorderSide(color: AppColors.border),
       ),
+
       enabledBorder: OutlineInputBorder(
         borderRadius: radius,
         borderSide: BorderSide(color: AppColors.border),
       ),
+
       focusedBorder: OutlineInputBorder(
         borderRadius: radius,
         borderSide: BorderSide(color: AppColors.primary, width: 1.5),
@@ -444,18 +626,28 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
+  // ------------------------------------------------------------
+  // ACCOUNT TYPE OPTION
+  // ------------------------------------------------------------
+
   Widget _buildAccountTypeOption({
+    required BuildContext context,
     required _AccountType type,
     required String label,
   }) {
     final isSelected = _accountType == type;
+
     return GestureDetector(
-      onTap: () => setState(() => _accountType = type),
+      onTap: () {
+        setState(() {
+          _accountType = type;
+        });
+      },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         decoration: BoxDecoration(
           color: AppColors.surfaceContainer,
-          borderRadius: BorderRadius.circular(8.r),
+          borderRadius: BorderRadius.circular(_radius(context, 8)),
           border: Border.all(
             color: isSelected ? AppColors.primary : AppColors.border,
           ),
@@ -487,7 +679,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     )
                   : null,
             ),
+
             const SizedBox(width: 8),
+
             Expanded(
               child: Text(
                 label,
