@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/adaptive_auth_layout.dart';
+import '../../hairdresser_dashboard/presentation/hairdresser_main_shell.dart';
 import '../../salon_dashboard/presentation/salon_main_shell.dart';
 import 'forgot_password_screen.dart';
 import 'sign_up_screen.dart';
@@ -205,7 +206,11 @@ class _SignInScreenState extends State<SignInScreen> {
             child: ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (_) => const SalonMainShell()),
+                  MaterialPageRoute(
+                    builder: (_) => _accountType == _AccountType.hairdresser
+                        ? const HairdresserMainShell()
+                        : const SalonMainShell(),
+                  ),
                 );
               },
               style: ElevatedButton.styleFrom(
